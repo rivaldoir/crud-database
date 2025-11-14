@@ -2,34 +2,62 @@
 
 @section('content')
 
-<div style="max-width:1100px;margin:auto;display:flex;gap:34px;flex-wrap:wrap;">
+<h1 class="center-logo"></h1>
 
-    <div style="flex:0 0 380px;">
-        <div class="glass">
-            <img src="{{ asset('storage/'.$menu->foto) }}" 
-                 style="width:100%;height:450px;object-fit:cover;border-radius:12px;">
+<div class="glass p-4" style="max-width:900px;margin:auto;">
+
+    <div class="row">
+
+        {{-- FOTO PRODUK --}}
+        <div class="col-md-5 text-center">
+            <div style="
+                width:100%;
+                height:420px;
+                border-radius:20px;
+                background:#050505;
+                border:1px solid rgba(255,255,255,0.08);
+                overflow:hidden;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+            ">
+                <img src="{{ asset('storage/'.$menu->foto) }}"
+                     style="width:100%;height:100%;object-fit:cover;">
+            </div>
         </div>
-    </div>
 
-    <div style="flex:1;">
-        <div class="glass">
+        {{-- INFORMASI PRODUK --}}
+        <div class="col-md-7">
 
-            <h1 style="font-family:'Oswald';color:var(--neon);margin:0;">
+            <h2 style="font-family:'Oswald';color:var(--neon);">
                 {{ $menu->nama_menu }}
-            </h1>
+            </h2>
 
-            <h3 style="color:var(--text-light);">Rp {{ number_format($menu->harga) }}</h3>
+            <h4 style="color:var(--text-light);margin-top:10px;">
+                Rp {{ number_format($menu->harga) }}
+            </h4>
 
-            <p style="color:var(--muted);line-height:1.6;">
-                {{ $menu->deskripsi ?? 'Minuman energi premium dengan rasa kuat dan efek boost maksimal untuk aktivitas intens.' }}
+            <p style="color:var(--muted);margin-top:15px;font-size:15px;">
+                {{ $menu->deskripsi }}
             </p>
 
-            <div style="display:flex;gap:12px;margin-top:16px;">
-                <a href="{{ route('checkout.form', $menu->id) }}" class="btn-buy">Checkout</a>
-                <a href="{{ route('user.produk') }}" class="btn-ghost">Back</a>
-            </div>
+            <a href="{{ route('checkout.form', $menu->id) }}"
+               class="btn"
+               style="margin-top:25px;padding:12px 20px;background:var(--neon);
+                      font-weight:700;border-radius:12px;color:black;
+                      text-decoration:none;box-shadow:0 0 15px rgba(0,255,102,0.5);">
+                Checkout Sekarang
+            </a>
+
+            <br><br>
+
+            <a href="{{ route('user.produk') }}"
+               style="color:var(--muted);text-decoration:none;">
+                ← Kembali ke Produk
+            </a>
 
         </div>
+
     </div>
 
 </div>

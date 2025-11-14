@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Menu;
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
-    /* ================================
-        ADMIN — CRUD
-    ================================== */
-
+    // ======================
+    // ADMIN INDEX
+    // ======================
     public function index()
     {
         $menus = Menu::all();
@@ -24,21 +24,20 @@ class MenuController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'nama_menu' => 'required',
             'deskripsi' => 'required',
-            'harga'     => 'required|numeric',
-            'foto'      => 'nullable|image'
+            'harga' => 'required|numeric',
+            'foto' => 'nullable|image'
         ]);
-
-        $data = $request->all();
 
         if ($request->hasFile('foto')) {
             $data['foto'] = $request->file('foto')->store('menu', 'public');
         }
 
         Menu::create($data);
-        return redirect()->route('menus.index')->with('success','Menu berhasil ditambah');
+
+        return redirect()->route('menus.index');
     }
 
     public function edit($id)
@@ -51,27 +50,43 @@ class MenuController extends Controller
     {
         $menu = Menu::findOrFail($id);
 
-        $data = $request->all();
+        $data = $request->validate([
+            'nama_menu' => 'required',
+            'deskripsi' => 'required',
+            'harga' => 'required|numeric',
+            'foto' => 'nullable|image'
+        ]);
 
         if ($request->hasFile('foto')) {
+
+            if ($menu->foto && Storage::disk('public')->exists($menu->foto)) {
+                Storage::disk('public')->delete($menu->foto);
+            }
+
             $data['foto'] = $request->file('foto')->store('menu', 'public');
         }
 
         $menu->update($data);
-        return redirect()->route('menus.index')->with('success','Menu berhasil diupdate');
+
+        return redirect()->route('menus.index');
     }
 
     public function destroy($id)
     {
-        Menu::findOrFail($id)->delete();
-        return redirect()->route('menus.index')->with('success','Menu berhasil dihapus');
+        $menu = Menu::findOrFail($id);
+
+        if ($menu->foto && Storage::disk('public')->exists($menu->foto)) {
+            Storage::disk('public')->delete($menu->foto);
+        }
+
+        $menu->delete();
+
+        return redirect()->route('menus.index');
     }
 
-
-    /* ================================
-        USER — SHOW PRODUK
-    ================================== */
-
+    // ======================
+    // USER PRODUK
+    // ======================
     public function userProduk()
     {
         $menus = Menu::all();
@@ -84,11 +99,9 @@ class MenuController extends Controller
         return view('user.detail', compact('menu'));
     }
 
-
-    /* ================================
-        CHECKOUT
-    ================================== */
-
+    // ======================
+    // CHECKOUT
+    // ======================
     public function checkoutForm($id)
     {
         $menu = Menu::findOrFail($id);
@@ -97,6 +110,21 @@ class MenuController extends Controller
 
     public function checkoutProcess(Request $request)
     {
-        return redirect()->route('user.selesai');
+        return redirect()->route('checkout.selesai');
+    }
+
+    // ======================
+    // API AUTO REFRESH
+    // ======================
+    public function apiMenus()
+    {
+        $menus = Menu::orderBy('id', 'asc')->get();
+
+        $menus->transform(function ($m) {
+            $m->foto_url = $m->foto ? asset('storage/' . $m->foto) : null;
+            return $m;
+        });
+
+        return response()->json($menus);
     }
 }
